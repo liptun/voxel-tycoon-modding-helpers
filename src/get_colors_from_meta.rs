@@ -1,5 +1,6 @@
 use crate::{hex_to_rgb::hex_to_rgb, json_parse::VTMetaSchema, save_image::Colors};
 
+#[derive(Hash, PartialEq, Eq, Debug)]
 pub enum MaterialProperty {
     Color,
     CompanyTint,
@@ -13,7 +14,7 @@ fn value_to_rgb(value: u8) -> [u8; 3] {
     [value, value, value]
 }
 
-pub fn get_colors_from_meta(meta: VTMetaSchema, property: MaterialProperty) -> Colors {
+pub fn get_colors_from_meta(meta: &VTMetaSchema, property: &MaterialProperty) -> Colors {
     let mut colors: Colors = Vec::new();
 
     for material in meta.materials.iter() {
