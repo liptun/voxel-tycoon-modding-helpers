@@ -1,0 +1,10 @@
+[tasks.build-release]
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.move-binary]
+command = "sudo"
+args = ["cp", "target/release/vt-utils", "/usr/local/bin"]
+
+[tasks.release]
+dependencies = ["build-release", "move-binary"]
