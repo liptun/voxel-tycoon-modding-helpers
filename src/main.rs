@@ -1,8 +1,10 @@
 mod json_parse;
-use std::{fs, path::PathBuf};
+mod save_image;
 
 use clap::Parser;
 use json_parse::parse_material_json;
+use save_image::save_image;
+use std::{fs, path::PathBuf};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -17,13 +19,12 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    println!("{:?}", args);
+    println!("--------------------------------------\n{:?}\n--------------------------------------", args);
 
     match fs::read_to_string(&args.file) {
         Ok(content) => {
             if let Ok(mat) = parse_material_json(&content) {
-                println!("{:?}", mat);
-                println!("Color palette size: {}", mat.materials.len());
+                save_image(&mat, &args.output.into());
             }
         }
         Err(e) => {
