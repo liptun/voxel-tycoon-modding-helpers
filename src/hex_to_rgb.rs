@@ -1,13 +1,13 @@
-use hex::{FromHex, FromHexError};
+use hex::FromHex;
 
 pub enum HexToRgbError {
-    ConversionError(FromHexError),
+    ConversionError,
 }
 pub fn hex_to_rgb(hex: &str) -> Result<[u8; 3], HexToRgbError> {
     let hex = hex.trim_start_matches('#');
     match Vec::from_hex(hex) {
         Ok(bytes) => Ok([bytes[0], bytes[1], bytes[2]]),
-        Err(e) => Err(HexToRgbError::ConversionError(e)),
+        Err(_) => Err(HexToRgbError::ConversionError),
     }
 }
 
@@ -26,13 +26,11 @@ mod tests {
     fn test_error_hex_conversion() {
         assert!(matches!(
             hex_to_rgb("42424"),
-            Err(HexToRgbError::ConversionError(FromHexError::OddLength))
+            Err(HexToRgbError::ConversionError)
         ));
         assert!(matches!(
             hex_to_rgb("42424t"),
-            Err(HexToRgbError::ConversionError(
-                FromHexError::InvalidHexCharacter { c: 't', index: 5 }
-            ))
+            Err(HexToRgbError::ConversionError)
         ));
     }
 }

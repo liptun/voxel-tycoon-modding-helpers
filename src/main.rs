@@ -100,8 +100,7 @@ fn main() {
                         &args.output.clone().into(),
                         &get_filename_for_material_property(&material_type),
                     ) {
-                        Ok(ok_message) => {
-                            let SaveImageSuccess::SaveOk(message) = ok_message;
+                        Ok(SaveImageSuccess::SaveOk(message)) => {
                             println!("{}", message);
                         }
                         Err(e) => println!("Saving failed {:?}", e),
