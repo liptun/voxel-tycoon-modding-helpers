@@ -1,10 +1,5 @@
 mod commands;
-
-mod get_colors_from_meta;
-mod get_filename;
-mod hex_to_rgb;
-mod json_parse;
-mod save_image;
+mod utils;
 
 use clap::Parser;
 use std::path::PathBuf;

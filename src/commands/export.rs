@@ -1,10 +1,10 @@
+use crate::utils::get_colors_from_meta::{get_colors_from_meta, MaterialProperty};
+use crate::utils::get_filename::get_filename_for_material_property;
+use crate::utils::json_parse::parse_material_json;
+use crate::utils::save_image::{save_image, SaveImageSuccess};
 use crate::CliArgs;
 use std::error::Error;
 use std::{collections::HashSet, fs, process};
-use crate::json_parse::parse_material_json;
-use crate::get_colors_from_meta::{get_colors_from_meta, MaterialProperty};
-use crate::get_filename::get_filename_for_material_property;
-use crate::save_image::{save_image, SaveImageSuccess};
 
 #[derive(Hash, PartialEq, Eq, Debug)]
 enum QueueOperation {
