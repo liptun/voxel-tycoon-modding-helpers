@@ -12,7 +12,7 @@ pub enum SaveImageSuccess {
 #[derive(Debug)]
 pub enum SaveImageError {
     SaveError,
-    InvalidInputLength(usize),
+    InvalidInputLength,
 }
 
 pub type Colors = Vec<[u8; 3]>;
@@ -23,7 +23,7 @@ pub fn save_image(
     filename: &str,
 ) -> Result<SaveImageSuccess, SaveImageError> {
     if colors.len() != 16 && colors.len() != 64 {
-        return Err(SaveImageError::InvalidInputLength(colors.len()));
+        return Err(SaveImageError::InvalidInputLength);
     }
     let tile_size = 16;
 
