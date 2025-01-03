@@ -1,5 +1,6 @@
 mod json_parse;
 mod save_image;
+mod hex_to_rgb;
 
 use clap::Parser;
 use json_parse::parse_material_json;
