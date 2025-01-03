@@ -1,4 +1,4 @@
-use crate::{hex_to_rgb::hex_to_rgb, json_parse::VTMetaSchema, save_image::Colors};
+use crate::utils::{hex_to_rgb::hex_to_rgb, json_parse::VTMetaSchema, save_image::Colors};
 
 #[derive(Hash, PartialEq, Eq, Debug)]
 pub enum MaterialProperty {

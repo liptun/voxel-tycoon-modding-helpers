@@ -1,44 +1,25 @@
 mod commands;
 mod utils;
 
-use clap::Parser;
-use std::path::PathBuf;
+use clap::{Parser, Subcommand};
+use commands::export::ExportArgs;
 
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-pub struct CliArgs {
-    file: PathBuf,
+#[derive(Parser)]
+#[command(version, about = "CLI tools for Voxel Tycoon mod makers", long_about = None)]
+pub struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
 
-    #[arg(default_value_t = String::from("."))]
-    output: String,
-
-    #[arg(short, long, default_value_t = false)]
-    verbose: bool,
-
-    #[arg(short, long, default_value_t = false)]
-    color: bool,
-
-    #[arg(short = 't', long, default_value_t = false)]
-    company_tint: bool,
-
-    #[arg(short, long, default_value_t = false)]
-    emission: bool,
-
-    #[arg(short, long, default_value_t = false)]
-    glassiness: bool,
-
-    #[arg(short, long, default_value_t = false)]
-    smoothness: bool,
-
-    #[arg(short = 'r', long, default_value_t = false)]
-    specular: bool,
-
-    #[arg(short, long, default_value_t = false)]
-    all: bool,
+#[derive(Subcommand)]
+enum Commands {
+    Export(ExportArgs),
 }
 
 fn main() {
-    let args = CliArgs::parse();
+    let args = Cli::parse();
 
-    commands::export::run(args).expect("error");
+    match args.command {
+        Commands::Export(args) => commands::export::run(args).expect("Error"),
+    }
 }

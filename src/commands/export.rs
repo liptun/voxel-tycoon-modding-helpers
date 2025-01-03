@@ -2,8 +2,9 @@ use crate::utils::get_colors_from_meta::{get_colors_from_meta, MaterialProperty}
 use crate::utils::get_filename::get_filename_for_material_property;
 use crate::utils::json_parse::parse_material_json;
 use crate::utils::save_image::{save_image, SaveImageSuccess};
-use crate::CliArgs;
+use clap::Parser;
 use std::error::Error;
+use std::path::PathBuf;
 use std::{collections::HashSet, fs, process};
 
 #[derive(Hash, PartialEq, Eq, Debug)]
@@ -13,7 +14,43 @@ enum QueueOperation {
 
 type QueueExport = HashSet<QueueOperation>;
 
-pub fn run(args: CliArgs) -> Result<(), Box<dyn Error>> {
+#[derive(Parser)]
+#[command(
+    about = "Export texture images from .meta files.",
+    long_about = "Creates material images from .meta files for usage in 3D editor software. Usefull for preview of exporting colored 3D models"
+)]
+pub struct ExportArgs {
+    file: PathBuf,
+
+    #[arg(default_value_t = String::from("."))]
+    output: String,
+
+    #[arg(short, long, default_value_t = false)]
+    verbose: bool,
+
+    #[arg(short, long, default_value_t = false)]
+    color: bool,
+
+    #[arg(short = 't', long, default_value_t = false)]
+    company_tint: bool,
+
+    #[arg(short, long, default_value_t = false)]
+    emission: bool,
+
+    #[arg(short, long, default_value_t = false)]
+    glassiness: bool,
+
+    #[arg(short, long, default_value_t = false)]
+    smoothness: bool,
+
+    #[arg(short = 'r', long, default_value_t = false)]
+    specular: bool,
+
+    #[arg(short, long, default_value_t = false)]
+    all: bool,
+}
+
+pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
     match fs::read_to_string(&args.file) {
         Ok(content) => {
             if let Ok(meta) = parse_material_json(&content) {

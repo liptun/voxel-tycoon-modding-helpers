@@ -1,4 +1,4 @@
-use crate::get_colors_from_meta::MaterialProperty;
+use crate::utils::get_colors_from_meta::MaterialProperty;
 
 pub fn get_filename_for_material_property(property: &MaterialProperty) -> String {
     match property {
