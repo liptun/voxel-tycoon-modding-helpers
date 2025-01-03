@@ -6,5 +6,24 @@ args = ["build", "--release"]
 command = "sudo"
 args = ["cp", "target/release/vt-utils", "/usr/local/bin"]
 
+[tasks.remove-binary]
+command = "sudo"
+args = ["rm", "/usr/local/bin/vt-utils"]
+
+[tasks.code-sign]
+command = "codesign"
+args = [
+    "--sign",
+    "${DEVELOPER_ID}",
+    "--timestamp",
+    "--options",
+    "runtime",
+    "--deep",
+    "target/release/vt-utils",
+]
+
 [tasks.release]
 dependencies = ["build-release", "move-binary"]
+
+[tasks.release-codesign]
+dependencies = ["build-release", "code-sign", "move-binary"]

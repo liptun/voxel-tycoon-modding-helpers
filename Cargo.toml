@@ -14,4 +14,4 @@ serde_json = "1.0.134"
 
 [[bin]]
 name = "vt-utils"
-path = "src/main.rs"
+path = "src/vt-utils.rs"
