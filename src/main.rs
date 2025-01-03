@@ -87,7 +87,7 @@ fn main() {
 
                 if queue.len() == 0 {
                     println!("Specify export operation. Use -h for help");
-                    process::exit(1);
+                    process::exit(2);
                 }
 
                 for operation in queue {
@@ -106,6 +106,9 @@ fn main() {
                         Err(e) => println!("Saving failed {:?}", e),
                     }
                 }
+            } else {
+                println!("Invalid input file. Verify if you provided .meta file");
+                process::exit(1);
             }
         }
         Err(e) => {
