@@ -56,8 +56,13 @@ pub fn save_image(
     let mut output_path = output_path.clone();
     output_path.push(filename);
 
+    let str_output_path: &str = &output_path.to_string_lossy();
+
     match corrected_orientation_img.save(&output_path) {
-        Ok(()) => Ok(SaveImageSuccess::SaveOk(format!("Succesfully saved {:?}", &output_path))),
+        Ok(()) => Ok(SaveImageSuccess::SaveOk(format!(
+            "Succesfully saved {}",
+            str_output_path
+        ))),
         Err(_) => Err(SaveImageError::SaveError),
     }
 }

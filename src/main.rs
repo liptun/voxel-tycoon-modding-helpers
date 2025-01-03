@@ -9,7 +9,7 @@ use get_colors_from_meta::{get_colors_from_meta, MaterialProperty};
 use get_filename::get_filename_for_material_property;
 use json_parse::parse_material_json;
 use save_image::{save_image, SaveImageSuccess};
-use std::{collections::HashSet, fs, path::PathBuf};
+use std::{collections::HashSet, fs, path::PathBuf, process};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -54,11 +54,6 @@ type QueueExport = HashSet<QueueOperation>;
 fn main() {
     let args = Args::parse();
 
-    println!(
-        "--------------------------------------\n{:?}\n--------------------------------------",
-        args
-    );
-
     match fs::read_to_string(&args.file) {
         Ok(content) => {
             if let Ok(meta) = parse_material_json(&content) {
@@ -90,7 +85,10 @@ fn main() {
                     queue.insert(QueueOperation::Export(MaterialProperty::Specular));
                 }
 
-                println!("Export queue ({}): {:?}", queue.len(), queue);
+                if queue.len() == 0 {
+                    println!("Specify export operation. Use -h for help");
+                    process::exit(1);
+                }
 
                 for operation in queue {
                     let QueueOperation::Export(material_type) = operation;
@@ -101,7 +99,9 @@ fn main() {
                         &get_filename_for_material_property(&material_type),
                     ) {
                         Ok(SaveImageSuccess::SaveOk(message)) => {
-                            println!("{}", message);
+                            if args.verbose {
+                                println!("{}", message);
+                            }
                         }
                         Err(e) => println!("Saving failed {:?}", e),
                     }
