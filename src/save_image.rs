@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use image::{ImageBuffer, Rgb};
+use image::{imageops, ImageBuffer, Rgb};
 use imageproc::drawing::draw_filled_rect_mut;
 use imageproc::rect::Rect;
 
@@ -51,10 +51,12 @@ pub fn save_image(
         }
     }
 
+    let corrected_orientation_img = imageops::flip_vertical(&img);
+
     let mut output_path = output_path.clone();
     output_path.push(filename);
 
-    match img.save(&output_path) {
+    match corrected_orientation_img.save(&output_path) {
         Ok(()) => Ok(SaveImageSuccess::SaveOk(format!("Succesfully saved {:?}", &output_path))),
         Err(_) => Err(SaveImageError::SaveError),
     }
