@@ -1,5 +1,4 @@
 use crate::utils::get_colors_from_meta::{get_colors_from_meta, MaterialProperty};
-use crate::utils::get_filename::get_filename_for_material_property;
 use crate::utils::json_parse::parse_material_json;
 use crate::utils::save_image::{save_image, SaveImageSuccess};
 use clap::Parser;
@@ -11,6 +10,9 @@ use std::{collections::HashSet, fs, process};
 enum QueueOperation {
     Export(MaterialProperty),
 }
+
+use MaterialProperty::*;
+use QueueOperation::Export;
 
 type QueueExport = HashSet<QueueOperation>;
 
@@ -56,30 +58,30 @@ pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
             if let Ok(meta) = parse_material_json(&content) {
                 let mut queue: QueueExport = HashSet::new();
                 if args.color {
-                    queue.insert(QueueOperation::Export(MaterialProperty::Color));
+                    queue.insert(Export(Color));
                 }
                 if args.company_tint {
-                    queue.insert(QueueOperation::Export(MaterialProperty::CompanyTint));
+                    queue.insert(Export(CompanyTint));
                 }
                 if args.emission {
-                    queue.insert(QueueOperation::Export(MaterialProperty::Emission));
+                    queue.insert(Export(Emission));
                 }
                 if args.glassiness {
-                    queue.insert(QueueOperation::Export(MaterialProperty::Glassiness));
+                    queue.insert(Export(Glassiness));
                 }
                 if args.smoothness {
-                    queue.insert(QueueOperation::Export(MaterialProperty::Smoothness));
+                    queue.insert(Export(Smoothness));
                 }
                 if args.specular {
-                    queue.insert(QueueOperation::Export(MaterialProperty::Specular));
+                    queue.insert(Export(Specular));
                 }
                 if args.all {
-                    queue.insert(QueueOperation::Export(MaterialProperty::Color));
-                    queue.insert(QueueOperation::Export(MaterialProperty::CompanyTint));
-                    queue.insert(QueueOperation::Export(MaterialProperty::Emission));
-                    queue.insert(QueueOperation::Export(MaterialProperty::Glassiness));
-                    queue.insert(QueueOperation::Export(MaterialProperty::Smoothness));
-                    queue.insert(QueueOperation::Export(MaterialProperty::Specular));
+                    queue.insert(Export(Color));
+                    queue.insert(Export(CompanyTint));
+                    queue.insert(Export(Emission));
+                    queue.insert(Export(Glassiness));
+                    queue.insert(Export(Smoothness));
+                    queue.insert(Export(Specular));
                 }
 
                 if queue.len() == 0 {
@@ -90,11 +92,8 @@ pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
                 for operation in queue {
                     let QueueOperation::Export(material_type) = operation;
                     let colors = get_colors_from_meta(&meta, &material_type);
-                    match save_image(
-                        &colors,
-                        &args.output.clone().into(),
-                        &get_filename_for_material_property(&material_type),
-                    ) {
+                    let filename = format!("palette-{}.png", &material_type);
+                    match save_image(&colors, &args.output.clone().into(), &filename) {
                         Ok(SaveImageSuccess::SaveOk(message)) => {
                             if args.verbose {
                                 println!("{}", message);

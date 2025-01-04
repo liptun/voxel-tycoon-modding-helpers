@@ -1,3 +1,5 @@
+use core::fmt;
+
 use crate::utils::{hex_to_rgb::hex_to_rgb, json_parse::VTMetaSchema, save_image::Colors};
 
 #[derive(Hash, PartialEq, Eq, Debug)]
@@ -8,6 +10,19 @@ pub enum MaterialProperty {
     Glassiness,
     Smoothness,
     Specular,
+}
+
+impl fmt::Display for MaterialProperty {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            MaterialProperty::Color => write!(f, "color"),
+            MaterialProperty::CompanyTint => write!(f, "company-tint"),
+            MaterialProperty::Emission => write!(f, "emission"),
+            MaterialProperty::Glassiness => write!(f, "glassiness"),
+            MaterialProperty::Smoothness => write!(f, "smoothness"),
+            MaterialProperty::Specular => write!(f, "specular"),
+        }
+    }
 }
 
 fn value_to_rgb(value: u8) -> [u8; 3] {
