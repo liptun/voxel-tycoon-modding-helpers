@@ -22,10 +22,10 @@ type QueueExport = HashSet<QueueOperation>;
     long_about = "Creates material images from .meta files for usage in 3D editor software. Usefull for preview of exporting colored 3D models"
 )]
 pub struct ExportArgs {
-    file: PathBuf,
+    input_file: PathBuf,
 
     #[arg(default_value_t = String::from("."))]
-    output: String,
+    output_directory: String,
 
     #[arg(short, long)]
     filename: Option<String>,
@@ -67,10 +67,10 @@ pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
     let filename = if let Some(input_filename) = args.filename {
         input_filename
     } else {
-        get_filename_from_path(&args.file)
+        get_filename_from_path(&args.input_file)
     };
 
-    match fs::read_to_string(&args.file) {
+    match fs::read_to_string(&args.input_file) {
         Ok(content) => {
             if let Ok(meta) = parse_material_json(&content) {
                 let mut queue: QueueExport = HashSet::new();
@@ -110,7 +110,7 @@ pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
                     let QueueOperation::Export(material_type) = operation;
                     let colors = get_colors_from_meta(&meta, &material_type);
                     let full_filename = format!("{}-{}.png", &filename, &material_type);
-                    match save_image(&colors, &args.output.clone().into(), &full_filename) {
+                    match save_image(&colors, &args.output_directory.clone().into(), &full_filename) {
                         Ok(SaveImageSuccess::SaveOk(message)) => {
                             if args.verbose {
                                 println!("{}", message);
