@@ -102,7 +102,7 @@ pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
                 }
 
                 if queue.len() == 0 {
-                    println!("Specify export operation. Use -h for help");
+                    println!("Specify export operation. Use -h for help or if you want export all textures use -a");
                     process::exit(2);
                 }
 
