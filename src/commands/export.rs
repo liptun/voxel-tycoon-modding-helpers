@@ -27,6 +27,9 @@ pub struct ExportArgs {
     #[arg(default_value_t = String::from("."))]
     output: String,
 
+    #[arg(short, long)]
+    filename: Option<String>,
+
     #[arg(short, long, default_value_t = false)]
     verbose: bool,
 
@@ -52,7 +55,21 @@ pub struct ExportArgs {
     all: bool,
 }
 
+fn get_filename_from_path(path: &PathBuf) -> String {
+    if let Some(stem) = path.file_stem() {
+        stem.to_string_lossy().to_string()
+    } else {
+        "palette".to_string()
+    }
+}
+
 pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
+    let filename = if let Some(input_filename) = args.filename {
+        input_filename
+    } else {
+        get_filename_from_path(&args.file)
+    };
+
     match fs::read_to_string(&args.file) {
         Ok(content) => {
             if let Ok(meta) = parse_material_json(&content) {
@@ -92,8 +109,8 @@ pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
                 for operation in queue {
                     let QueueOperation::Export(material_type) = operation;
                     let colors = get_colors_from_meta(&meta, &material_type);
-                    let filename = format!("palette-{}.png", &material_type);
-                    match save_image(&colors, &args.output.clone().into(), &filename) {
+                    let full_filename = format!("{}-{}.png", &filename, &material_type);
+                    match save_image(&colors, &args.output.clone().into(), &full_filename) {
                         Ok(SaveImageSuccess::SaveOk(message)) => {
                             if args.verbose {
                                 println!("{}", message);
