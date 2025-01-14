@@ -110,7 +110,8 @@ pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
                     let QueueOperation::Export(material_type) = operation;
                     let colors = get_colors_from_meta(&meta, &material_type);
                     let full_filename = format!("{}-{}.png", &filename, &material_type);
-                    match save_image(&colors, &args.output_directory.clone().into(), &full_filename) {
+                    let mut output_directory: PathBuf = args.output_directory.clone().into();
+                    match save_image(&colors, &mut output_directory, &full_filename) {
                         Ok(SaveImageSuccess::SaveOk(message)) => {
                             if args.verbose {
                                 println!("{}", message);

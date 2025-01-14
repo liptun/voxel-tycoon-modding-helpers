@@ -19,7 +19,7 @@ pub type Colors = Vec<[u8; 3]>;
 
 pub fn save_image(
     colors: &Colors,
-    output_path: &PathBuf,
+    output_path: &mut PathBuf,
     filename: &str,
 ) -> Result<SaveImageSuccess, SaveImageError> {
     if colors.len() != 16 && colors.len() != 64 {
@@ -53,7 +53,6 @@ pub fn save_image(
 
     let corrected_orientation_img = imageops::flip_vertical(&img);
 
-    let mut output_path = output_path.clone();
     output_path.push(filename);
 
     let str_output_path: &str = &output_path.to_string_lossy();
