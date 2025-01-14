@@ -1,10 +1,9 @@
 use crate::utils::get_colors_from_meta::{get_colors_from_meta, MaterialProperty};
-use crate::utils::json_parse::parse_material_json;
+use crate::utils::json_parse::{parse_material_json, VTMetaReadError};
 use crate::utils::save_image::{save_image, SaveImageSuccess};
 use clap::Parser;
-use std::error::Error;
 use std::path::PathBuf;
-use std::{collections::HashSet, fs, process};
+use std::{collections::HashSet, fs};
 
 #[derive(Hash, PartialEq, Eq, Debug)]
 enum QueueOperation {
@@ -63,70 +62,70 @@ fn get_filename_from_path(path: &PathBuf) -> String {
     }
 }
 
-pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
+#[derive(Debug)]
+pub enum ExportError {
+    FileRead,
+    JsonParse,
+    NoOperations,
+}
+
+pub fn run(args: ExportArgs) -> Result<(), ExportError> {
     let filename = if let Some(input_filename) = args.filename {
         input_filename
     } else {
         get_filename_from_path(&args.input_file)
     };
 
-    match fs::read_to_string(&args.input_file) {
-        Ok(content) => {
-            if let Ok(meta) = parse_material_json(&content) {
-                let mut operations: QueueExport = HashSet::new();
-                if args.color {
-                    operations.insert(Export(Color));
-                }
-                if args.company_tint {
-                    operations.insert(Export(CompanyTint));
-                }
-                if args.emission {
-                    operations.insert(Export(Emission));
-                }
-                if args.glassiness {
-                    operations.insert(Export(Glassiness));
-                }
-                if args.smoothness {
-                    operations.insert(Export(Smoothness));
-                }
-                if args.specular {
-                    operations.insert(Export(Specular));
-                }
-                if args.all {
-                    operations.insert(Export(Color));
-                    operations.insert(Export(CompanyTint));
-                    operations.insert(Export(Emission));
-                    operations.insert(Export(Glassiness));
-                    operations.insert(Export(Smoothness));
-                    operations.insert(Export(Specular));
-                }
+    let content =
+        fs::read_to_string(&args.input_file).map_err(|_e: std::io::Error| ExportError::FileRead)?;
 
-                if operations.len() == 0 {
-                    println!("Specify export operation. Use -h for help or if you want export all textures use -a");
-                    process::exit(2);
-                }
+    let meta =
+        parse_material_json(&content).map_err(|_e: VTMetaReadError| ExportError::JsonParse)?;
 
-                for operation in operations {
-                    let QueueOperation::Export(material_type) = operation;
-                    let colors = get_colors_from_meta(&meta, &material_type);
-                    let full_filename = format!("{}-{}.png", &filename, &material_type);
-                    let mut output_directory: PathBuf = args.output_directory.clone().into();
-                    match save_image(&colors, &mut output_directory, &full_filename) {
-                        Ok(SaveImageSuccess::SaveOk(message)) => {
-                            if args.verbose {
-                                println!("{}", message);
-                            }
-                        }
-                        Err(e) => println!("Saving failed {:?}", e),
-                    }
+    let mut operations: QueueExport = HashSet::new();
+    if args.color {
+        operations.insert(Export(Color));
+    }
+    if args.company_tint {
+        operations.insert(Export(CompanyTint));
+    }
+    if args.emission {
+        operations.insert(Export(Emission));
+    }
+    if args.glassiness {
+        operations.insert(Export(Glassiness));
+    }
+    if args.smoothness {
+        operations.insert(Export(Smoothness));
+    }
+    if args.specular {
+        operations.insert(Export(Specular));
+    }
+    if args.all {
+        operations.insert(Export(Color));
+        operations.insert(Export(CompanyTint));
+        operations.insert(Export(Emission));
+        operations.insert(Export(Glassiness));
+        operations.insert(Export(Smoothness));
+        operations.insert(Export(Specular));
+    }
+
+    if operations.len() == 0 {
+        return Err(ExportError::NoOperations);
+    }
+
+    for operation in operations {
+        let QueueOperation::Export(material_type) = operation;
+        let colors = get_colors_from_meta(&meta, &material_type);
+        let full_filename = format!("{}-{}.png", &filename, &material_type);
+        let mut output_directory: PathBuf = args.output_directory.clone().into();
+        match save_image(&colors, &mut output_directory, &full_filename) {
+            Ok(SaveImageSuccess::SaveOk(message)) => {
+                if args.verbose {
+                    println!("{}", message);
                 }
-            } else {
-                println!("Invalid input file. Verify if you provided .meta file");
-                process::exit(1);
             }
-        }
-        Err(e) => {
-            eprintln!("Failed to read the file: {}", e);
+            Err(e) => println!("Saving failed {:?}", e),
         }
     }
     Ok(())
