@@ -73,40 +73,40 @@ pub fn run(args: ExportArgs) -> Result<(), Box<dyn Error>> {
     match fs::read_to_string(&args.input_file) {
         Ok(content) => {
             if let Ok(meta) = parse_material_json(&content) {
-                let mut queue: QueueExport = HashSet::new();
+                let mut operations: QueueExport = HashSet::new();
                 if args.color {
-                    queue.insert(Export(Color));
+                    operations.insert(Export(Color));
                 }
                 if args.company_tint {
-                    queue.insert(Export(CompanyTint));
+                    operations.insert(Export(CompanyTint));
                 }
                 if args.emission {
-                    queue.insert(Export(Emission));
+                    operations.insert(Export(Emission));
                 }
                 if args.glassiness {
-                    queue.insert(Export(Glassiness));
+                    operations.insert(Export(Glassiness));
                 }
                 if args.smoothness {
-                    queue.insert(Export(Smoothness));
+                    operations.insert(Export(Smoothness));
                 }
                 if args.specular {
-                    queue.insert(Export(Specular));
+                    operations.insert(Export(Specular));
                 }
                 if args.all {
-                    queue.insert(Export(Color));
-                    queue.insert(Export(CompanyTint));
-                    queue.insert(Export(Emission));
-                    queue.insert(Export(Glassiness));
-                    queue.insert(Export(Smoothness));
-                    queue.insert(Export(Specular));
+                    operations.insert(Export(Color));
+                    operations.insert(Export(CompanyTint));
+                    operations.insert(Export(Emission));
+                    operations.insert(Export(Glassiness));
+                    operations.insert(Export(Smoothness));
+                    operations.insert(Export(Specular));
                 }
 
-                if queue.len() == 0 {
+                if operations.len() == 0 {
                     println!("Specify export operation. Use -h for help or if you want export all textures use -a");
                     process::exit(2);
                 }
 
-                for operation in queue {
+                for operation in operations {
                     let QueueOperation::Export(material_type) = operation;
                     let colors = get_colors_from_meta(&meta, &material_type);
                     let full_filename = format!("{}-{}.png", &filename, &material_type);
