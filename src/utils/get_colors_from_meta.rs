@@ -14,14 +14,15 @@ pub enum MaterialProperty {
 
 impl fmt::Display for MaterialProperty {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            MaterialProperty::Color => write!(f, "color"),
-            MaterialProperty::CompanyTint => write!(f, "company-tint"),
-            MaterialProperty::Emission => write!(f, "emission"),
-            MaterialProperty::Glassiness => write!(f, "glassiness"),
-            MaterialProperty::Smoothness => write!(f, "smoothness"),
-            MaterialProperty::Specular => write!(f, "specular"),
-        }
+        let display: &str = match self {
+            MaterialProperty::Color => "color",
+            MaterialProperty::CompanyTint => "company-tint",
+            MaterialProperty::Emission => "emission",
+            MaterialProperty::Glassiness => "glassiness",
+            MaterialProperty::Smoothness => "smoothness",
+            MaterialProperty::Specular => "specular",
+        };
+        write!(f, "{}", display)
     }
 }
 
