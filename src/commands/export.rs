@@ -69,6 +69,18 @@ pub enum ExportError {
     NoOperations,
 }
 
+impl From<std::io::Error> for ExportError {
+    fn from(_e: std::io::Error) -> Self {
+        ExportError::FileRead
+    }
+}
+
+impl From<VTMetaReadError> for ExportError {
+    fn from(_e: VTMetaReadError) -> Self {
+        ExportError::JsonParse
+    }
+}
+
 pub fn run(args: ExportArgs) -> Result<(), ExportError> {
     let filename = if let Some(input_filename) = args.filename {
         input_filename
@@ -76,11 +88,9 @@ pub fn run(args: ExportArgs) -> Result<(), ExportError> {
         get_filename_from_path(&args.input_file)
     };
 
-    let content =
-        fs::read_to_string(&args.input_file).map_err(|_e: std::io::Error| ExportError::FileRead)?;
+    let content = fs::read_to_string(&args.input_file)?;
 
-    let meta =
-        parse_material_json(&content).map_err(|_e: VTMetaReadError| ExportError::JsonParse)?;
+    let meta = parse_material_json(&content)?;
 
     let mut operations: QueueExport = HashSet::new();
     if args.color {
