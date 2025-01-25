@@ -6,14 +6,14 @@ use std::path::PathBuf;
 use std::{collections::HashSet, fs};
 
 #[derive(Hash, PartialEq, Eq, Debug)]
-enum QueueOperation {
+enum ExportOperation {
     Export(MaterialProperty),
 }
 
+use ExportOperation::Export;
 use MaterialProperty::*;
-use QueueOperation::Export;
 
-type QueueExport = HashSet<QueueOperation>;
+type ExportOperations = HashSet<ExportOperation>;
 
 #[derive(Parser)]
 #[command(
@@ -81,18 +81,18 @@ impl From<VTMetaReadError> for ExportError {
     }
 }
 
-pub fn run(args: ExportArgs) -> Result<(), ExportError> {
-    let filename = if let Some(input_filename) = args.filename {
-        input_filename
-    } else {
-        get_filename_from_path(&args.input_file)
-    };
+struct ProcessArgs {
+    color: bool,
+    company_tint: bool,
+    emission: bool,
+    glassiness: bool,
+    smoothness: bool,
+    specular: bool,
+    all: bool,
+}
 
-    let content = fs::read_to_string(&args.input_file)?;
-
-    let meta = parse_material_json(&content)?;
-
-    let mut operations: QueueExport = HashSet::new();
+fn process_operations(args: &ProcessArgs) -> Result<ExportOperations, ExportError> {
+    let mut operations: ExportOperations = HashSet::new();
     if args.color {
         operations.insert(Export(Color));
     }
@@ -123,9 +123,33 @@ pub fn run(args: ExportArgs) -> Result<(), ExportError> {
     if operations.len() == 0 {
         return Err(ExportError::NoOperations);
     }
+    Ok(operations)
+}
+
+pub fn run(args: ExportArgs) -> Result<(), ExportError> {
+    let filename = if let Some(input_filename) = args.filename {
+        input_filename
+    } else {
+        get_filename_from_path(&args.input_file)
+    };
+
+    let content = fs::read_to_string(&args.input_file)?;
+
+    let meta = parse_material_json(&content)?;
+
+    let process_args = ProcessArgs {
+        color: args.color,
+        company_tint: args.company_tint,
+        emission: args.emission,
+        glassiness: args.glassiness,
+        smoothness: args.smoothness,
+        specular: args.specular,
+        all: args.all,
+    };
+    let operations = process_operations(&process_args)?;
 
     for operation in operations {
-        let QueueOperation::Export(material_type) = operation;
+        let ExportOperation::Export(material_type) = operation;
         let colors = get_colors_from_meta(&meta, &material_type);
         let full_filename = format!("{}-{}.png", &filename, &material_type);
         let mut output_directory: PathBuf = args.output_directory.clone().into();
