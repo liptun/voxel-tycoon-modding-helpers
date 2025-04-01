@@ -16,9 +16,9 @@ pub fn get_variants_names_from_meta(meta: &VTMetaSchema) -> Option<Vec<String>> 
     None
 }
 
-pub fn get_variant_from_meta(meta: &VTMetaSchema, variant: String) -> Option<&VariantSchema> {
+pub fn get_variant_from_meta<'a>(meta: &'a VTMetaSchema, variant: &'a String) -> Option<&'a VariantSchema> {
     if let Some(meta_variants) = &meta.variants {
-        if let Some(variant_colors) = &meta_variants.get(&variant) {
+        if let Some(variant_colors) = &meta_variants.get(variant) {
             return Some(variant_colors);
         }
     }
@@ -26,7 +26,11 @@ pub fn get_variant_from_meta(meta: &VTMetaSchema, variant: String) -> Option<&Va
     None
 }
 
-pub fn get_palette_from_meta(meta: &VTMetaSchema, variant: Option<String>) -> VTPalette {
+pub enum GetPaleteError {
+    VariantNotExist
+}
+
+pub fn get_palette_from_meta(meta: &VTMetaSchema, variant: &Option<String>) -> Result<VTPalette, GetPaleteError> {
     let mut palette: VTPalette = meta.materials.clone();
 
     if let Some(variant) = variant {
@@ -35,8 +39,10 @@ pub fn get_palette_from_meta(meta: &VTMetaSchema, variant: Option<String>) -> VT
                 let index: usize = *material_index as usize;
                 palette[index] = material.clone();
             }
+        } else {
+            return Err(GetPaleteError::VariantNotExist)
         }
     }
 
-    palette
+    Ok(palette)
 }

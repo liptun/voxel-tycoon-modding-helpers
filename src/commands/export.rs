@@ -71,6 +71,7 @@ pub enum ExportError {
     FileRead,
     JsonParse,
     NoOperations,
+    InvalidVariantName(String),
 }
 
 impl From<std::io::Error> for ExportError {
@@ -141,7 +142,11 @@ pub fn run(args: ExportArgs) -> Result<(), ExportError> {
 
     let meta = parse_material_json(&content)?;
 
-    let palette = get_palette_from_meta(&meta, args.variant);
+    let palette = if let Ok(palette) = get_palette_from_meta(&meta, &args.variant) {
+        palette
+    } else {
+        return Err(ExportError::InvalidVariantName(args.variant.unwrap_or("".to_owned())));
+    };
 
     let process_args = ProcessArgs {
         color: args.color,
