@@ -1,6 +1,6 @@
 use crate::utils::get_colors_from_meta::{get_colors_from_palette, MaterialProperty};
 use crate::utils::json_parse::{parse_material_json, VTMetaReadError};
-use crate::utils::palette::get_palette_from_meta;
+use crate::utils::palette::{get_palette_from_meta, get_variants_names_from_meta};
 use crate::utils::save_image::{save_image, SaveImageSuccess};
 use clap::Parser;
 use std::path::PathBuf;
@@ -71,7 +71,7 @@ pub enum ExportError {
     FileRead,
     JsonParse,
     NoOperations,
-    InvalidVariantName(String),
+    InvalidVariantName((String, Option<Vec<String>>)),
 }
 
 impl From<std::io::Error> for ExportError {
@@ -145,7 +145,12 @@ pub fn run(args: ExportArgs) -> Result<(), ExportError> {
     let palette = if let Ok(palette) = get_palette_from_meta(&meta, &args.variant) {
         palette
     } else {
-        return Err(ExportError::InvalidVariantName(args.variant.unwrap_or("".to_owned())));
+        let variant_name = args.variant.unwrap_or("".to_string());
+        let available_variants = get_variants_names_from_meta(&meta);
+        return Err(ExportError::InvalidVariantName((
+            variant_name,
+            available_variants,
+        )));
     };
 
     let process_args = ProcessArgs {
