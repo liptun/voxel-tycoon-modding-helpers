@@ -32,7 +32,10 @@ fn run_export(args: ExportArgs) {
         ),
         Err(ExportError::JsonParse) => {
             println!("Invalid input file. Verify if you provided .meta file.",)
-        }
+        },
+        Err(ExportError::InvalidVariantName(variant)) => {
+            println!("Invalid variant name: {}", variant)
+        },
         Ok(_) => {}
     }
 }
