@@ -16,7 +16,7 @@ pub struct MaterialSchema {
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "PascalCase")]
 pub struct VariantSchema {
-    pub materials: HashMap<String, MaterialSchema>,
+    pub materials: HashMap<u8, MaterialSchema>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
