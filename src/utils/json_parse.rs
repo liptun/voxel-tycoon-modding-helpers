@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "PascalCase")]
 pub struct MaterialSchema {
     pub color: String,
@@ -11,10 +13,17 @@ pub struct MaterialSchema {
     pub specular: u8,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "PascalCase")]
+pub struct VariantSchema {
+    pub materials: HashMap<String, MaterialSchema>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "PascalCase")]
 pub struct VTMetaSchema {
     pub materials: Vec<MaterialSchema>,
+    pub variants: Option<HashMap<String, VariantSchema>>
 }
 
 #[derive(Debug)]

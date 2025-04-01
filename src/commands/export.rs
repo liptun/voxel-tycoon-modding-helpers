@@ -1,5 +1,6 @@
-use crate::utils::get_colors_from_meta::{get_colors_from_meta, MaterialProperty};
+use crate::utils::get_colors_from_meta::{get_colors_from_palette, MaterialProperty};
 use crate::utils::json_parse::{parse_material_json, VTMetaReadError};
+use crate::utils::palette::get_palette_from_meta;
 use crate::utils::save_image::{save_image, SaveImageSuccess};
 use clap::Parser;
 use std::path::PathBuf;
@@ -49,6 +50,9 @@ pub struct ExportArgs {
 
     #[arg(short = 'r', long, default_value_t = false)]
     specular: bool,
+
+    #[arg(long)]
+    variant: Option<String>,
 
     #[arg(short, long, default_value_t = false)]
     all: bool,
@@ -137,6 +141,8 @@ pub fn run(args: ExportArgs) -> Result<(), ExportError> {
 
     let meta = parse_material_json(&content)?;
 
+    let palette = get_palette_from_meta(&meta, args.variant);
+
     let process_args = ProcessArgs {
         color: args.color,
         company_tint: args.company_tint,
@@ -150,7 +156,7 @@ pub fn run(args: ExportArgs) -> Result<(), ExportError> {
 
     for operation in operations {
         let ExportOperation::Export(material_type) = operation;
-        let colors = get_colors_from_meta(&meta, &material_type);
+        let colors = get_colors_from_palette(&palette, &material_type);
         let full_filename = format!("{}-{}.png", &filename, &material_type);
         let mut output_directory: PathBuf = args.output_directory.clone().into();
         match save_image(&colors, &mut output_directory, &full_filename) {
