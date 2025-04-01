@@ -167,7 +167,12 @@ pub fn run(args: ExportArgs) -> Result<(), ExportError> {
     for operation in operations {
         let ExportOperation::Export(material_type) = operation;
         let colors = get_colors_from_palette(&palette, &material_type);
-        let full_filename = format!("{}-{}.png", &filename, &material_type);
+        let varians_suffix = if let Some(variant) = &args.variant {
+            format!("-{}", variant)
+        } else {
+            "".to_string()
+        };
+        let full_filename = format!("{}-{}{}.png", &filename, &material_type, varians_suffix);
         let mut output_directory: PathBuf = args.output_directory.clone().into();
         match save_image(&colors, &mut output_directory, &full_filename) {
             Ok(SaveImageSuccess::SaveOk(message)) => {
