@@ -1,6 +1,8 @@
 use core::fmt;
 
-use crate::utils::{hex_to_rgb::hex_to_rgb, json_parse::VTMetaSchema, save_image::Colors};
+use crate::utils::{hex_to_rgb::hex_to_rgb, save_image::Colors};
+
+use super::palette::VTPalette;
 
 #[derive(Hash, PartialEq, Eq, Debug)]
 pub enum MaterialProperty {
@@ -30,10 +32,10 @@ fn value_to_rgb(value: u8) -> [u8; 3] {
     [value, value, value]
 }
 
-pub fn get_colors_from_meta(meta: &VTMetaSchema, property: &MaterialProperty) -> Colors {
+pub fn get_colors_from_palette(palette: &VTPalette, property: &MaterialProperty) -> Colors {
     let mut colors: Colors = Vec::new();
 
-    for material in meta.materials.iter() {
+    for material in palette.iter() {
         let color: [u8; 3] = match property {
             MaterialProperty::Color => hex_to_rgb(&material.color).unwrap_or([0, 0, 0]),
             MaterialProperty::CompanyTint => value_to_rgb(material.company_tint),
