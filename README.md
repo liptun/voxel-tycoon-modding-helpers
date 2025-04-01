@@ -49,3 +49,7 @@ Make sure the `$DEVELOPER_ID` environment variable is set to your developer iden
 ### 1.0.0
 - Initial release
 - `export` subcommand for generating images from `*.obj.meta` files
+
+### 1.1.0
+- Added support for exporting color palette variants.
+- Introduced `--variant <name>` parameter under the `export` subcommand to specify the variant's name.
