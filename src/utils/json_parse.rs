@@ -23,7 +23,7 @@ pub struct VariantSchema {
 #[serde(rename_all = "PascalCase")]
 pub struct VTMetaSchema {
     pub materials: Vec<MaterialSchema>,
-    pub variants: Option<HashMap<String, VariantSchema>>
+    pub variants: Option<HashMap<String, VariantSchema>>,
 }
 
 #[derive(Debug)]
