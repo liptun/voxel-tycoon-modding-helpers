@@ -35,6 +35,19 @@ pub fn get_nested_variants_names_from_meta(meta: &VTMetaSchema) -> Option<Vec<St
     None
 }
 
+pub fn get_variant_from_meta<'a>(
+    meta: &'a VTMetaSchema,
+    variant: &'a String,
+) -> Option<&'a VariantSchema> {
+    if let Some(meta_variants) = &meta.variants {
+        if let Some(variant_colors) = &meta_variants.get(variant) {
+            return Some(variant_colors);
+        }
+    }
+
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::json_parse::parse_material_json;
