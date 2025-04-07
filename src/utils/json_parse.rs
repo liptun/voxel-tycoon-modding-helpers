@@ -17,6 +17,7 @@ pub struct MaterialSchema {
 #[serde(rename_all = "PascalCase")]
 pub struct VariantSchema {
     pub materials: HashMap<u8, MaterialSchema>,
+    pub variants: Option<HashMap<String, VariantSchema>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
