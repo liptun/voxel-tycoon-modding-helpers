@@ -17,7 +17,7 @@ fn get_variants_names_from_variant(variant: &VariantSchema) -> Option<Vec<String
     None
 }
 
-pub fn get_nested_variants_names_from_meta(meta: &VTMetaSchema) -> Option<Vec<String>> {
+pub fn get_variants_names_from_meta(meta: &VTMetaSchema) -> Option<Vec<String>> {
     let mut variant_names: Vec<String> = Vec::new();
     if let Some(variants) = &meta.variants {
         for (key, variant) in variants {
@@ -142,7 +142,7 @@ mod tests {
     #[test]
     fn test_get_variants_names() {
         let meta = parse_material_json(&get_test_data_with_variants()).expect("Should create meta");
-        let mut variants = get_nested_variants_names_from_meta(&meta).expect("Should get variants");
+        let mut variants = get_variants_names_from_meta(&meta).expect("Should get variants");
         variants.sort();
 
         let mut expected_variants = vec![
@@ -158,6 +158,6 @@ mod tests {
 
         let meta_without =
             parse_material_json(&get_test_data_without_variants()).expect("Should create meta");
-        assert_eq!(get_nested_variants_names_from_meta(&meta_without), None);
+        assert_eq!(get_variants_names_from_meta(&meta_without), None);
     }
 }

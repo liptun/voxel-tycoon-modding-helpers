@@ -2,7 +2,7 @@ use crate::utils::get_colors_from_meta::{get_colors_from_palette, MaterialProper
 use crate::utils::json_parse::{parse_material_json, VTMetaReadError};
 use crate::utils::palette::get_palette_from_meta;
 use crate::utils::save_image::{save_image, SaveImageSuccess};
-use crate::utils::variants::get_nested_variants_names_from_meta;
+use crate::utils::variants::get_variants_names_from_meta;
 use clap::Parser;
 use std::path::PathBuf;
 use std::{collections::HashSet, fs};
@@ -147,7 +147,7 @@ pub fn run(args: ExportArgs) -> Result<(), ExportError> {
         palette
     } else {
         let variant_name = args.variant.unwrap_or("".to_string());
-        let available_variants = get_nested_variants_names_from_meta(&meta);
+        let available_variants = get_variants_names_from_meta(&meta);
         return Err(ExportError::InvalidVariantName((
             variant_name,
             available_variants,
