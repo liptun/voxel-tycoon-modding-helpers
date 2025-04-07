@@ -1,5 +1,5 @@
 use super::{
-    json_parse::{MaterialSchema, VTMetaSchema},
+    json_parse::{MaterialSchema, VTMetaSchema, VariantSchema},
     variants::get_variant_from_meta,
 };
 
@@ -10,6 +10,13 @@ pub enum GetPaletteError {
     VariantNotExist,
 }
 
+fn swap_palette_materials_with_variant(palette: &mut VTPalette, variant: &VariantSchema) {
+    for (material_index, material) in variant.materials.iter() {
+        let index: usize = *material_index as usize;
+        palette[index] = material.clone();
+    }
+}
+
 pub fn get_palette_from_meta(
     meta: &VTMetaSchema,
     variant: &Option<String>,
@@ -18,10 +25,7 @@ pub fn get_palette_from_meta(
 
     if let Some(variant_name) = variant {
         if let Some(variant_colors) = get_variant_from_meta(meta, variant_name) {
-            for (material_index, material) in variant_colors.materials.iter() {
-                let index: usize = *material_index as usize;
-                palette[index] = material.clone();
-            }
+            swap_palette_materials_with_variant(&mut palette, variant_colors);
         } else {
             return Err(GetPaletteError::VariantNotExist);
         }
