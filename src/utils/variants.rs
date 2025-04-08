@@ -72,16 +72,40 @@ pub fn get_variant_path_from_meta(
         .and_then(|variants| search_for_variant_path(variants, variant_name))
 }
 
+fn search_for_variant<'a>(
+    variants: &'a Variants,
+    variant_name: &'a String,
+) -> Option<&'a VariantSchema> {
+    if let Some(variant) = variants.get(variant_name) {
+        return Some(variant);
+    }
+
+    for (_, sub_variant) in variants {
+        if let Some(found) = get_variant_from_variant(&sub_variant, &variant_name) {
+            return Some(found);
+        }
+    }
+
+    None
+}
+
+fn get_variant_from_variant<'a>(
+    variant: &'a VariantSchema,
+    variant_name: &'a String,
+) -> Option<&'a VariantSchema> {
+    if let Some(meta_variants) = &variant.variants {
+        return search_for_variant(meta_variants, variant_name);
+    }
+
+    None
+}
+
 pub fn get_variant_from_meta<'a>(
     meta: &'a VTMetaSchema,
     variant_name: &'a String,
 ) -> Option<&'a VariantSchema> {
     if let Some(meta_variants) = &meta.variants {
-        let variant_path = get_variant_path_from_meta(meta, variant_name);
-        println!("PATH TO VARIANT {:?}", variant_path);
-        if let Some(variant_colors) = &meta_variants.get(variant_name) {
-            return Some(variant_colors);
-        }
+        return search_for_variant(meta_variants, variant_name);
     }
 
     None

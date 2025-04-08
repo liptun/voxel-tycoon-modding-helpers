@@ -1,3 +1,5 @@
+use crate::utils::variants::get_variant_path_from_meta;
+
 use super::{
     json_parse::{MaterialSchema, VTMetaSchema, VariantSchema},
     variants::get_variant_from_meta,
@@ -8,6 +10,7 @@ pub type VTPalette = Vec<MaterialSchema>;
 #[derive(Debug)]
 pub enum GetPaletteError {
     VariantNotExist,
+    FailedToBuildPalette,
 }
 
 fn swap_palette_materials_with_variant(palette: &mut VTPalette, variant: &VariantSchema) {
@@ -24,10 +27,12 @@ pub fn get_palette_from_meta(
     let mut palette = meta.materials.clone();
 
     if let Some(variant_name) = variant {
-        if let Some(variant_colors) = get_variant_from_meta(meta, variant_name) {
+        let variant_path = get_variant_path_from_meta(meta, variant_name)
+            .ok_or(GetPaletteError::VariantNotExist)?;
+        for variant_path_item in variant_path {
+            let variant_colors = get_variant_from_meta(meta, &variant_path_item)
+                .ok_or(GetPaletteError::FailedToBuildPalette)?;
             swap_palette_materials_with_variant(&mut palette, variant_colors);
-        } else {
-            return Err(GetPaletteError::VariantNotExist);
         }
     }
 
