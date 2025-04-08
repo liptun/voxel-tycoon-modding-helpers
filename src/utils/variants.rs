@@ -35,12 +35,61 @@ pub fn get_variants_names_from_meta(meta: &VTMetaSchema) -> Option<Vec<String>> 
     None
 }
 
+fn get_variant_subpath_from_variant<'a>(
+    variant: &'a VariantSchema,
+    variant_name: &'a String,
+) -> Option<Vec<String>> {
+    if let Some(sub_variants) = variant.variants.clone() {
+        if let Some(_) = sub_variants.get(variant_name) {
+            return Some(vec![variant_name.to_owned()]);
+        } else {
+            for (key, sub_variant) in sub_variants {
+                if let Some(found) =
+                    get_variant_subpath_from_variant(&sub_variant, variant_name)
+                {
+                    let mut result = vec![key.to_string()];
+                    result.extend(found);
+                    return Some(result);
+                }
+            }
+        }
+    };
+
+    None
+}
+
+pub fn get_variant_path_from_meta<'a>(
+    meta: &'a VTMetaSchema,
+    variant_name: &'a String,
+) -> Option<Vec<String>> {
+    if let Some(meta_variants) = &meta.variants {
+        if let Some(_) = meta_variants.get(variant_name) {
+            return Some(vec![variant_name.to_owned()]);
+        } else {
+            for (key, sub_variant) in meta_variants {
+                println!("Iterating {} from root meta", key);
+                if let Some(found) =
+                    get_variant_subpath_from_variant(sub_variant, variant_name)
+                {
+                    let mut result = vec![key.to_string()];
+                    result.extend(found);
+                    return Some(result);
+                }
+            }
+        }
+    }
+
+    None
+}
+
 pub fn get_variant_from_meta<'a>(
     meta: &'a VTMetaSchema,
-    variant: &'a String,
+    variant_name: &'a String,
 ) -> Option<&'a VariantSchema> {
     if let Some(meta_variants) = &meta.variants {
-        if let Some(variant_colors) = &meta_variants.get(variant) {
+        let variant_path = get_variant_path_from_meta(meta, variant_name);
+        println!("PATH TO VARIANT {:?}", variant_path);
+        if let Some(variant_colors) = &meta_variants.get(variant_name) {
             return Some(variant_colors);
         }
     }
@@ -159,5 +208,35 @@ mod tests {
         let meta_without =
             parse_material_json(&get_test_data_without_variants()).expect("Should create meta");
         assert_eq!(get_variants_names_from_meta(&meta_without), None);
+    }
+
+    #[test]
+    fn test_get_variant_path_from_meta_deep_lvl() {
+        let meta = parse_material_json(&get_test_data_with_variants()).expect("Should create meta");
+        let expected_variants = vec![
+            "foo".to_string(),
+            "bar".to_string(),
+            "lorem".to_string(),
+            "ipsum".to_string(),
+            "deep".to_string(),
+        ];
+
+        let variants = get_variant_path_from_meta(&meta, &"deep".to_string())
+            .expect("Should get variants");
+
+        assert_eq!(variants, expected_variants);
+    }
+
+    #[test]
+    fn test_get_variant_path_from_meta_first_lvl() {
+        let meta = parse_material_json(&get_test_data_with_variants()).expect("Should create meta");
+        let expected_variants = vec![
+            "night".to_string(),
+        ];
+
+        let variants = get_variant_path_from_meta(&meta, &"night".to_string())
+            .expect("Should get variants");
+
+        assert_eq!(variants, expected_variants);
     }
 }
