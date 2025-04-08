@@ -1,4 +1,4 @@
-use super::json_parse::{VTMetaSchema, VariantSchema};
+use super::json_parse::{VTMetaSchema, VariantSchema, Variants};
 
 fn get_variants_names_from_variant(variant: &VariantSchema) -> Option<Vec<String>> {
     let mut variant_names: Vec<String> = Vec::new();
@@ -35,51 +35,41 @@ pub fn get_variants_names_from_meta(meta: &VTMetaSchema) -> Option<Vec<String>> 
     None
 }
 
-fn get_variant_subpath_from_variant<'a>(
-    variant: &'a VariantSchema,
-    variant_name: &'a String,
-) -> Option<Vec<String>> {
-    if let Some(sub_variants) = variant.variants.clone() {
-        if let Some(_) = sub_variants.get(variant_name) {
-            return Some(vec![variant_name.to_owned()]);
-        } else {
-            for (key, sub_variant) in sub_variants {
-                if let Some(found) =
-                    get_variant_subpath_from_variant(&sub_variant, variant_name)
-                {
-                    let mut result = vec![key.to_string()];
-                    result.extend(found);
-                    return Some(result);
-                }
-            }
-        }
-    };
+pub type VariantPath = Vec<String>;
 
-    None
-}
+fn search_for_variant_path(variants: &Variants, variant_name: &String) -> Option<VariantPath> {
+    if let Some(_) = variants.get(variant_name) {
+        return Some(vec![variant_name.to_owned()]);
+    }
 
-pub fn get_variant_path_from_meta<'a>(
-    meta: &'a VTMetaSchema,
-    variant_name: &'a String,
-) -> Option<Vec<String>> {
-    if let Some(meta_variants) = &meta.variants {
-        if let Some(_) = meta_variants.get(variant_name) {
-            return Some(vec![variant_name.to_owned()]);
-        } else {
-            for (key, sub_variant) in meta_variants {
-                println!("Iterating {} from root meta", key);
-                if let Some(found) =
-                    get_variant_subpath_from_variant(sub_variant, variant_name)
-                {
-                    let mut result = vec![key.to_string()];
-                    result.extend(found);
-                    return Some(result);
-                }
-            }
+    for (key, sub_variant) in variants {
+        if let Some(found) = get_variant_subpath_from_variant(&sub_variant, &variant_name) {
+            let mut result = vec![key.to_string()];
+            result.extend(found);
+            return Some(result);
         }
     }
 
     None
+}
+
+fn get_variant_subpath_from_variant(
+    variant: &VariantSchema,
+    variant_name: &String,
+) -> Option<VariantPath> {
+    variant
+        .variants
+        .as_ref()
+        .and_then(|variants| search_for_variant_path(variants, variant_name))
+}
+
+pub fn get_variant_path_from_meta(
+    meta: &VTMetaSchema,
+    variant_name: &String,
+) -> Option<VariantPath> {
+    meta.variants
+        .as_ref()
+        .and_then(|variants| search_for_variant_path(variants, variant_name))
 }
 
 pub fn get_variant_from_meta<'a>(
@@ -221,8 +211,8 @@ mod tests {
             "deep".to_string(),
         ];
 
-        let variants = get_variant_path_from_meta(&meta, &"deep".to_string())
-            .expect("Should get variants");
+        let variants =
+            get_variant_path_from_meta(&meta, &"deep".to_string()).expect("Should get variants");
 
         assert_eq!(variants, expected_variants);
     }
@@ -230,12 +220,10 @@ mod tests {
     #[test]
     fn test_get_variant_path_from_meta_first_lvl() {
         let meta = parse_material_json(&get_test_data_with_variants()).expect("Should create meta");
-        let expected_variants = vec![
-            "night".to_string(),
-        ];
+        let expected_variants = vec!["night".to_string()];
 
-        let variants = get_variant_path_from_meta(&meta, &"night".to_string())
-            .expect("Should get variants");
+        let variants =
+            get_variant_path_from_meta(&meta, &"night".to_string()).expect("Should get variants");
 
         assert_eq!(variants, expected_variants);
     }
