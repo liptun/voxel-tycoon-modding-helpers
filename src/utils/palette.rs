@@ -49,46 +49,40 @@ mod tests {
         r#"
         {
           "Materials": [
-            {
-              "Color": "424242",
-              "CompanyTint": 21,
-              "Emission": 37,
-              "Glassiness": 69,
-              "Smoothness": 66,
-              "Specular": 13
-            },
-            {
-              "Color": "ffa500",
-              "CompanyTint": 0,
-              "Emission": 0,
-              "Glassiness": 0,
-              "Smoothness": 0,
-              "Specular": 0
-            }
+            {"Color": "424242","CompanyTint": 21,"Emission": 37,"Glassiness": 69,"Smoothness": 66,"Specular": 13},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0},
+            {"Color": "ffa500","CompanyTint": 0,"Emission": 0,"Glassiness": 0,"Smoothness": 0,"Specular": 0}
           ],
           "Variants": {
             "Foo": {
               "Materials": {
-                "1": {
-                  "Color": "ff0000",
-                  "CompanyTint": 21,
-                  "Emission": 37,
-                  "Glassiness": 69,
-                  "Smoothness": 66,
-                  "Specular": 13
-                }
+                "1": {"Color": "ff0000","CompanyTint": 21,"Emission": 37,"Glassiness": 69,"Smoothness": 66,"Specular": 13}
               }
             },
             "Bar": {
               "Materials": {
-                "1": {
-                  "Color": "00ff00",
-                  "CompanyTint": 21,
-                  "Emission": 37,
-                  "Glassiness": 69,
-                  "Smoothness": 66,
-                  "Specular": 13
-                }
+                "1": {"Color": "00ff00","CompanyTint": 21,"Emission": 37,"Glassiness": 69,"Specular": 13,"Smoothness": 66}
+              },
+              "Variants": {
+                  "Lorem": {
+                      "Materials": {
+                        "2": {"Color": "0000ff","CompanyTint": 21,"Emission": 37,"Glassiness": 69,"Specular": 13,"Smoothness": 66}
+                      },
+                      "Variants": null
+                  }
               }
             }
           }
@@ -126,5 +120,18 @@ mod tests {
 
         assert_eq!(palette[1].color, "ff0000");
         assert_ne!(palette[1].color, "ffa500");
+    }
+
+    #[test]
+    fn test_get_palette_from_meta_nested_variant() {
+        let meta = parse_material_json(&get_test_data_with_variants()).expect("Should create meta");
+        let search_variant = "Lorem".to_string();
+
+        let palette =
+            get_palette_from_meta(&meta, &Some(search_variant)).expect("Should get palette");
+
+        assert_eq!(palette[0].color, "424242");
+        assert_eq!(palette[1].color, "00ff00");
+        assert_eq!(palette[2].color, "0000ff");
     }
 }
