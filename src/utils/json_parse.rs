@@ -13,18 +13,20 @@ pub struct MaterialSchema {
     pub specular: u8,
 }
 
+pub type Variants = HashMap<String, VariantSchema>;
+
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "PascalCase")]
 pub struct VariantSchema {
     pub materials: HashMap<u8, MaterialSchema>,
-    pub variants: Option<HashMap<String, VariantSchema>>,
+    pub variants: Option<Variants>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "PascalCase")]
 pub struct VTMetaSchema {
     pub materials: Vec<MaterialSchema>,
-    pub variants: Option<HashMap<String, VariantSchema>>,
+    pub variants: Option<Variants>,
 }
 
 #[derive(Debug)]
